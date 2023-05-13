@@ -2,7 +2,8 @@
     <v-app>
         <AppBar :is-my-turn="isMyTurn" :my-score="myScore" :opponent-score="opponentScore" />
 
-        <v-progress-circular v-if="isLoading" :size="50" color="primary" style="margin: 150px auto;" indeterminate></v-progress-circular>
+        <v-progress-circular v-if="isLoading" :size="50" color="primary" style="margin: 150px auto;"
+            indeterminate></v-progress-circular>
 
         <v-main class="mt-5" v-else>
             <div v-if="!winner">
@@ -35,6 +36,13 @@
             <GameResult v-if="winner" :winner="winner" :is-blackjack="isBlackjack" :myCards="myCards"
                 :opponentCards="opponentCards" :myScore="myScore" :opponentScore="opponentScore"
                 @startNewRound="setNewRound" />
+
+            <div style="width: 80%; margin: 0 auto;">
+                <h5>Current API: <italic>{{ endpoint }}</italic></h5>
+                <v-text-field class="mt-2" label="Endpoint" placeholder="Endpoint" v-model="lastPartOfAPIInputValue" outlined dense
+                    style="max-width: 350px;"></v-text-field>
+                <v-btn color="primary" @click="setNewEndpoint">OK</v-btn>
+            </div>
         </v-main>
 
         <v-dialog v-model="drawDialog" max-width="290">
@@ -61,7 +69,7 @@
 import AppBar from './components/AppBar.vue';
 import GameCard from './components/GameCard.vue';
 import GameResult from './components/GameResult.vue';
-import shuffleDeckRandomly from './helper/shuffleDeckRandomly.js';
+import axios from 'axios';
 
 export default {
     name: 'App',
@@ -83,13 +91,16 @@ export default {
         hideOpponentFirstCard: true,
         drawDialog: false,
         isBlackjack: false,
-        isLoading: false
+        isLoading: false,
+        lastPartOfAPI: "shuffle",
+        lastPartOfAPIInputValue: "",
+        api: "https://blackjack.ekstern.dev.nav.no/"
     }),
 
     methods: {
         async setDeck() {
             this.isLoading = true
-            const randomDeck = await shuffleDeckRandomly();
+            const randomDeck = await this.shuffleDeckRandomly();
             this.isLoading = false
             this.setNewRound();
 
@@ -185,6 +196,15 @@ export default {
         closeDrawDialog() {
             this.setNewRound();
             this.drawDialog = false;
+        },
+
+        async shuffleDeckRandomly (){
+            const response = await axios.get(this.endpoint);
+            return response.data;
+        },
+
+        setNewEndpoint() {
+            this.lastPartOfAPI = this.lastPartOfAPIInputValue;
         }
     },
 
@@ -193,6 +213,10 @@ export default {
             return this.myScore > 16 && this.myScore < 21
                 && this.opponentScore > 16 && this.opponentScore < 21
                 && this.opponentScore === this.myScore;
+        },
+
+        endpoint() {
+            return this.api + this.lastPartOfAPI;
         }
     },
 
