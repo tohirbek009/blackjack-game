@@ -1,11 +1,8 @@
-import deckOfCards from '../data/deckOfCards.json'
+import axios from 'axios'
 
-const shuffleDeckRandomly = () => {
-    for (let i = deckOfCards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deckOfCards[i], deckOfCards[j]] = [deckOfCards[j], deckOfCards[i]];
-    }
-    return deckOfCards;
+const shuffleDeckRandomly = async () => {
+    const response = await axios.get("https://blackjack.ekstern.dev.nav.no/shuffle");
+    return response.data;
 }
 
 export default shuffleDeckRandomly;

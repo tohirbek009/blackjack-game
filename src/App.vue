@@ -2,7 +2,9 @@
     <v-app>
         <AppBar :is-my-turn="isMyTurn" :my-score="myScore" :opponent-score="opponentScore" />
 
-        <v-main class="mt-5">
+        <v-progress-circular v-if="isLoading" :size="50" color="primary" style="margin: 150px auto;" indeterminate></v-progress-circular>
+
+        <v-main class="mt-5" v-else>
             <div v-if="!winner">
                 <div class="game-proccess">
                     <div class="game-proccess-block">
@@ -60,7 +62,6 @@ import AppBar from './components/AppBar.vue';
 import GameCard from './components/GameCard.vue';
 import GameResult from './components/GameResult.vue';
 import shuffleDeckRandomly from './helper/shuffleDeckRandomly.js';
-import axios from 'axios'
 
 export default {
     name: 'App',
@@ -81,12 +82,15 @@ export default {
         winner: null,
         hideOpponentFirstCard: true,
         drawDialog: false,
-        isBlackjack: false
+        isBlackjack: false,
+        isLoading: false
     }),
 
     methods: {
-        setDeck() {
-            const randomDeck = shuffleDeckRandomly();
+        async setDeck() {
+            this.isLoading = true
+            const randomDeck = await shuffleDeckRandomly();
+            this.isLoading = false
             this.setNewRound();
 
             randomDeck.forEach(card => {
@@ -182,11 +186,6 @@ export default {
             this.setNewRound();
             this.drawDialog = false;
         }
-    },
-
-    async mounted() {
-        const response = await axios.get("https://blackjack.ekstern.dev.nav.no/shuffle");
-        console.log(response)
     },
 
     computed: {
